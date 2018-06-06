@@ -31,10 +31,6 @@
       register: hosted_zone_facts
       no_log: true
 
-    - name: Spit out debug
-      debug:
-        msg: "{{ hosted_zone_facts.ResourceRecordSets.0.ResourceRecords|map(attribute='Value')|list }}"
-
     - name: Create our NS entries in the parent
       route53:
         state: present
@@ -43,7 +39,6 @@
         type: NS
         value: "{{ hosted_zone_facts.ResourceRecordSets.0.ResourceRecords|map(attribute='Value')|list }}"
         overwrite: true
-
   when:
     - zone.is_delegated|default(False)
     - zone.account_id|default(False)
