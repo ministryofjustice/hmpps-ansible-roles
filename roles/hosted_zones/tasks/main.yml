@@ -1,0 +1,8 @@
+---
+
+- name: Create our zones
+  include: create_zones.yml
+  with_items: "{{ hosted_zones }}"
+  loop_control:
+    loop_var: zone
+  when: hosted_zones|default([])

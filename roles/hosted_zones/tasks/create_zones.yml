@@ -1,0 +1,61 @@
+---
+
+- block:
+    - name: Assume our child role
+      sts_assume_role:
+        role_arn: "arn:aws:iam::{{ zone.account_id }}:role/{{ zone.role_name }}"
+        role_session_name: "{{ 9999999999999999999999 | random | to_uuid }}"
+      register: assumed_role
+      no_log: true
+
+    - name: Create hosted zone
+      route53_zone:
+        aws_access_key: "{{ assumed_role.sts_creds.access_key }}"
+        aws_secret_key: "{{ assumed_role.sts_creds.secret_key }}"
+        security_token: "{{ assumed_role.sts_creds.session_token }}"
+        zone: "{{ zone.zone_name }}{{ parent_zone_name }}"
+        state: present
+        comment: "{{ zone.zone_name }} managed by ansible"
+      register: zone_details
+      no_log: true
+
+    - name: Retrieve our hosted zone facts
+      route53_facts:
+        aws_access_key: "{{ assumed_role.sts_creds.access_key }}"
+        aws_secret_key: "{{ assumed_role.sts_creds.secret_key }}"
+        security_token: "{{ assumed_role.sts_creds.session_token }}"
+        query: record_sets
+        type: NS
+        start_record_name: "{{ zone.zone_name }}{{ parent_zone_name }}"
+        hosted_zone_id: "{{ zone_details.result.zone_id }}"
+      register: hosted_zone_facts
+      no_log: true
+
+    - name: Spit out debug
+      debug:
+        msg: "{{ hosted_zone_facts.ResourceRecordSets.0.ResourceRecords|map(attribute='Value')|list }}"
+
+    - name: Create our NS entries in the parent
+      route53:
+        state: present
+        zone: "{{ parent_zone_name }}"
+        record: "{{ zone.zone_name }}{{ parent_zone_name }}"
+        type: NS
+        value: "{{ hosted_zone_facts.ResourceRecordSets.0.ResourceRecords|map(attribute='Value')|list }}"
+        overwrite: true
+
+  when:
+    - zone.is_delegated|default(False)
+    - zone.account_id|default(False)
+    - parent_account_id|default(False)
+
+- block:
+    - name: Create hosted zone
+      route53_zone:
+        zone: "{{ zone.zone_name }}{{ parent_zone_name }}"
+        state: present
+        comment: "{{ zone.zone_name }} managed by ansible"
+      register: zone_details
+
+  when:
+    - not zone.is_delegated|default(False)
