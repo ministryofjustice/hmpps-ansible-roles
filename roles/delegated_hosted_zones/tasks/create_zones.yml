@@ -13,9 +13,9 @@
         aws_access_key: "{{ assumed_role.sts_creds.access_key }}"
         aws_secret_key: "{{ assumed_role.sts_creds.secret_key }}"
         security_token: "{{ assumed_role.sts_creds.session_token }}"
-        zone: "{{ zone.zone_name }}{{ parent_zone_name }}"
+        zone: "{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
         state: present
-        comment: "{{ zone.zone_name }} managed by ansible"
+        comment: "{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }} managed by ansible"
       register: zone_details
       no_log: true
 
@@ -26,7 +26,7 @@
         security_token: "{{ assumed_role.sts_creds.session_token }}"
         query: record_sets
         type: NS
-        start_record_name: "{{ zone.zone_name }}{{ parent_zone_name }}"
+        start_record_name: "{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
         hosted_zone_id: "{{ zone_details.result.zone_id }}"
       register: hosted_zone_facts
       no_log: true
@@ -35,7 +35,7 @@
       route53:
         state: present
         zone: "{{ parent_zone_name }}"
-        record: "{{ zone.zone_name }}{{ parent_zone_name }}"
+        record: "{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
         type: NS
         value: "{{ hosted_zone_facts.ResourceRecordSets.0.ResourceRecords|map(attribute='Value')|list }}"
         overwrite: true
@@ -47,9 +47,9 @@
 - block:
     - name: Create hosted zone
       route53_zone:
-        zone: "{{ zone.zone_name }}{{ parent_zone_name }}"
+        zone: "{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
         state: present
-        comment: "{{ zone.zone_name }} managed by ansible"
+        comment: "{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }} managed by ansible"
       register: zone_details
 
   when:
