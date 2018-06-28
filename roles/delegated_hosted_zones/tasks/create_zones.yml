@@ -34,11 +34,17 @@
     - name: Create our NS entries in the parent
       route53:
         state: present
-        zone: "{{ parent_zone_name }}"
+        zone: "{{ parent_zone_name | rstrip('.') }}."
         record: "{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
         type: NS
         value: "{{ hosted_zone_facts.ResourceRecordSets.0.ResourceRecords|map(attribute='Value')|list }}"
         overwrite: true
+      no_log: true
+
+    - name: Display our hosted zone output
+      debug:
+        msg: "ZoneID {{zone_details.result.zone_id}} for hostedzone {{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
+
   when:
     - zone.is_delegated|default(False)
     - zone.account_id|default(False)
@@ -51,6 +57,12 @@
         state: present
         comment: "{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }} managed by ansible"
       register: zone_details
+      no_log: true
+
+    - name: Display our hosted zone output
+      debug:
+        msg: "ZoneID {{zone_details.result.zone_id}} for hostedzone {{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
 
   when:
     - not zone.is_delegated|default(False)
+
