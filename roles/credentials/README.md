@@ -1,11 +1,11 @@
 ### Credentials stuffing and generation roles
 
 
-Roles to (re)generate and/or populate credentials into AWS SSM Parameter Store
+Roles to (re)generate and/or populate credentials into AWS SSM Parameter Store.
 
 
-The credentials can either be pre-existing or generated on the fly, if they exist by default the do not overwrite the contents of the
-exsting credential set.
+The credentials can either be pre-existing or generated on the fly, if they exist by default they do not overwrite the contents of the
+existing credential set.
 
 ##### Variables provided by the playbook
 The playbook is required to provide `account` and `environment` as input variables
@@ -69,22 +69,28 @@ products:
         type: password
         password_length: 64
         #Generates a random password will regenerate each play
-      - name: my_secret_password
+      - name: my_secret_changing_password
         type: password
         password_length: 64
+        overwrite: True
         # Stores a predefined string in the clear
       - name: my_clear_string
         value: "Hello World"
         type: string
         # Stores a predefined string in an encrypted format
       - name: my_secure_string
+        value: "This is not the string you are looking for"
         type: string
         ssm_type: SecureString
-        value: "This is not the string you are looking for"
         # Generates a ssh key with a random passphrase, the public key is stored in clear
       - name: my_secure_ssh_key
         type: ssh-key
         hasPassword: True
+        # Regenerates a ssh key with a random passphrase, the public key is stored in clear
+      - name: my_random_secure_ssh_key
+        type: ssh-key
+        hasPassword: True
+        overwrite: True
         # Generates a ssh key with no passphrase, public key is stored in clear
       - name: my_ssh_key
         type: ssh-key
