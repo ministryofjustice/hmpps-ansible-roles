@@ -11,7 +11,7 @@ existing credential set.
 The playbook is required to provide `account` and `environment` as input variables
 
  - `account` - the descriptive account name, synonymous with product ie `vcms` or `engineering`
- - `environment` - this is the environment we're targeting, ie `dev` or `prod`
+ - `environment_name` - this is the environment we're targeting, ie `dev` or `prod`
  
 #### Data types
 - ##### String Entry
