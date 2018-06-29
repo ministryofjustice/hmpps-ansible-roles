@@ -14,7 +14,7 @@ The playbook is required to provide `account` and `environment` as input variabl
  - `environment` - this is the environment we're targeting, ie `dev` or `prod`
  
 #### Data types
-- #####String Entry
+- ##### String Entry
     A simple predefined string that can be stored encrypted or in the clear
     
     The metadata and variables associated are below
@@ -25,7 +25,7 @@ The playbook is required to provide `account` and `environment` as input variabl
       overwrite: <Optional> #Do we want to replace the value on each run, default False
       type: string #required
     ```
-- #####Password Entry
+- ##### Password Entry
     Either a predefined password or an entry to generate a password
     
     The metadata and variables associated are below
@@ -37,7 +37,7 @@ The playbook is required to provide `account` and `environment` as input variabl
       type: password #required
     ```
     
-- #####SSH-Key Entry
+- ##### SSH-Key Entry
     Either a predefined key or an entry to generate a new one
     
     The metadata and variables associated are below
@@ -50,7 +50,7 @@ The playbook is required to provide `account` and `environment` as input variabl
       type: password #required
     ```
 
-######Example metadata
+###### Example metadata
 ```yaml
 products:
   # This is the namespace root key, we can have multiples
