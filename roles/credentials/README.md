@@ -12,14 +12,14 @@ The playbook is required to provide `account` and `environment` as input variabl
 
  - `account` - the descriptive account name, synonymous with product ie `vcms` or `engineering`
  - `environment_name` - this is the environment we're targeting, ie `dev` or `prod`
- 
+
 #### Data types
 - ##### String Entry
     A simple predefined string that can be stored encrypted or in the clear
-    
+
     The metadata and variables associated are below
     ```yaml
-    - name: <Required> #The name of the entry  
+    - name: <Required> #The name of the entry
       ssm_type: <Optional> # Either String or SecureString defaults to String
       value: <Required> # The contents of our string
       overwrite: <Optional> #Do we want to replace the value on each run, default False
@@ -27,25 +27,25 @@ The playbook is required to provide `account` and `environment` as input variabl
     ```
 - ##### Password Entry
     Either a predefined password or an entry to generate a password
-    
+
     The metadata and variables associated are below
     ```yaml
-    - name: <Required> #The name of the entry  
+    - name: <Required> #The name of the entry
       value: <Optional> # The contents of our password
       password_length: <Optional> #The number of characters our password is to be
       overwrite: <Optional> #Do we want to replace the value on each run, default False
       type: password #required
     ```
-    
+
 - ##### SSH-Key Entry
     Either a predefined key or an entry to generate a new one
-    
+
     The metadata and variables associated are below
     ```yaml
     - name: <Required> #The name of the entry
       public_key: <Optional> # The contents of the public key, if private_key is set and this is empty, will be generated
       private_key: <Optional> # The contents of the private key
-      hasPassword: <Optional> # If this is set, a password will be generated for key creation 
+      hasPassword: <Optional> # If this is set, a password will be generated for key creation
       overwrite: <Optional> #Do we want to replace the value on each run, default False
       type: password #required
     ```
@@ -54,10 +54,10 @@ The playbook is required to provide `account` and `environment` as input variabl
 ```yaml
 products:
   # This is the namespace root key, we can have multiples
-- name: root 
+- name: root
   namespaces:
     # Service level key ie jenkins/gitlab/github
-  - name: testing 
+  - name: testing
     roles:
     - creds:
         # Stores an encrypted predefined string as a password
@@ -106,3 +106,5 @@ products:
 ```
 
 Credentials generated from above are stored in a qualfied name `/<environment>/<account>/<namespace_root>/<service>/<credential_name>`
+
+TODO update readme for sts_assume_role updates.
