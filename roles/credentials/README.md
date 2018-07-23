@@ -13,6 +13,11 @@ The playbook is required to provide `account` and `environment` as input variabl
  - `account` - the descriptive account name, synonymous with product ie `vcms` or `engineering`
  - `environment_name` - this is the environment we're targeting, ie `dev` or `prod`
 
+ Optionaly if the variable:
+
+ - `extract_ssm_entry` - default is false is set true then credentials will be extracted and populate a dictionary called `secrets`.
+
+
 #### Data types
 - ##### String Entry
     A simple predefined string that can be stored encrypted or in the clear
@@ -200,4 +205,33 @@ products:
         account_id: 123456789987
         role_name: "admin"
         is_delegated: True
+```
+
+#### Credential extraction.
+
+The same data used to create the credentials will be used to extract them using the same key in a dictionary called secrets.
+
+Running the role with
+```
+vars:
+        extract_ssm_entry: True
+```
+And this block in your role will enable you to view the credentials when running Ansible with verbosity set to level 1 (`-v`)
+
+```
+- name: Display secrets
+  debug:
+    msg: "{{ hostvars.localhost.secrets | to_nice_json }} "
+    verbosity: 1
+```
+
+Example
+```
+ok: [localhost] => {
+    "msg": {
+        "/playpit/delius-core/weblogic/weblogic/my_secure_ssh_key/ssh_passphrase": "aI1JM8gjVMgs4cvIC6gbD54r0lrEtbP3",
+        "/playpit/delius-core/weblogic/weblogic/wls_admin_user3": "BH9ih15qS4",
+        "/playpit/delius-core/weblogic/weblogic/wls_admin_user6": "ie5Aj806zR"
+    }
+}
 ```
