@@ -209,7 +209,7 @@ products:
 
 #### Credential extraction.
 
-The same data used to create the credentials will be used to extract them using the same key in a distionary called secrets.
+The same data used to create the credentials will be used to extract them using the same key in a dictionary called secrets.
 
 Running the role with
 ```
