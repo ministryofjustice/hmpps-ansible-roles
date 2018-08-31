@@ -1,5 +1,12 @@
 ---
 
+- name: Assume our parent role, we run this on jenkins no local so we need to delegate to the primary account
+  sts_assume_role:
+    role_arn: "arn:aws:iam::{{ parent_account_id }}:role/{{ role_name }}"
+    role_session_name: "{{ 9999999999999999999999 | random | to_uuid }}"
+  register: parent_assumed_role
+  no_log: true
+
 - name: Create our zones
   include: create_zones.yml
   with_items: "{{ hosted_zones }}"
