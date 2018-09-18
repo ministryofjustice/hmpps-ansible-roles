@@ -1,0 +1,55 @@
+---
+
+- name: Gather certificate facts
+  aws_acm_facts:
+    name: "*.{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
+  register: acm_facts
+
+- block:
+    - name: Create our certificate if it does not exist
+      command: "aws acm request-certificate
+               --domain-name *.{{ zone.zone_name | rstrip('.') + '.' + parent_zone_name }}
+               --validation-method DNS
+               --region {{ aws_region|default('eu-west-2') }}"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ sts_aws_access_key }}"
+        AWS_SECRET_ACCESS_KEY: "{{ sts_aws_secret_key }}"
+        AWS_SESSION_TOKEN: "{{ sts_security_token }}"
+      register: acm_data
+
+    - name: Wait for aws to catch up
+      pause:
+        seconds: 15
+
+    - name: Gather our newly created certificate facts
+      aws_acm_facts:
+        aws_access_key: "{{ sts_aws_access_key }}"
+        aws_secret_key: "{{ sts_aws_secret_key }}"
+        security_token: "{{ sts_security_token }}"
+        name: "*.{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
+      register: new_acm_facts
+
+    - name: Create our validation dns entry
+      route53:
+        aws_access_key: "{{ sts_aws_access_key }}"
+        aws_secret_key: "{{ sts_aws_secret_key }}"
+        security_token: "{{ sts_security_token }}"
+        state: present
+        zone: "{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
+        record: "{{ new_acm_facts.certificates[0].domain_validation_options[0].resource_record.name }}"
+        type: "{{ new_acm_facts.certificates[0].domain_validation_options[0].resource_record.type }}"
+        value: "{{ new_acm_facts.certificates[0].domain_validation_options[0].resource_record.value }}"
+        ttl: 30
+        wait: yes
+
+    - name: Display our certificate arn
+      debug:
+        msg: "*.{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}: {{ new_acm_facts.certificates[0].certificate_arn }}"
+
+  when: acm_facts.certificates == []
+
+- block:
+    - name: Display our certificate arn
+      debug:
+        msg: "*.{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}: {{ acm_facts.certificates[0].certificate_arn }}"
+  when: acm_facts.certificates != []
