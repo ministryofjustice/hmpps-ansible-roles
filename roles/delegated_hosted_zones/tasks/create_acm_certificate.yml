@@ -39,8 +39,8 @@
         record: "{{ new_acm_facts.certificates[0].domain_validation_options[0].resource_record.name }}"
         type: "{{ new_acm_facts.certificates[0].domain_validation_options[0].resource_record.type }}"
         value: "{{ new_acm_facts.certificates[0].domain_validation_options[0].resource_record.value }}"
-        ttl: 30
-        wait: yes
+        overwrite: true
+      ignore_errors: true
 
     - name: Display our certificate arn
       debug:
