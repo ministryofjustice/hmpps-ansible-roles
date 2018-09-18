@@ -48,6 +48,12 @@
       debug:
         msg: "ZoneID {{zone_details.result.zone_id}} for hostedzone {{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
 
+    - name: Set our sts facts
+      set_fact:
+        sts_aws_access_key: "{{ assumed_role.sts_creds.access_key }}"
+        sts_aws_secret_key: "{{ assumed_role.sts_creds.secret_key }}"
+        sts_security_token: "{{ assumed_role.sts_creds.session_token }}"
+
   when:
     - zone.is_delegated|default(False)
     - zone.account_id|default(False)
@@ -69,6 +75,15 @@
       debug:
         msg: "ZoneID {{zone_details.result.zone_id}} for hostedzone {{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}"
 
+    - name: Set our sts facts
+      set_fact:
+        sts_aws_access_key: "{{ parent_assumed_role.sts_creds.access_key }}"
+        sts_aws_secret_key: "{{ parent_assumed_role.sts_creds.secret_key }}"
+        sts_security_token: "{{ parent_assumed_role.sts_creds.session_token }}"
+
   when:
     - not zone.is_delegated|default(False)
 
+
+- name: Ensure we have an acm certificate for the zone
+  include: create_acm_certificate.yml
