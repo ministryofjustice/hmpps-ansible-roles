@@ -37,7 +37,7 @@ The playbook is required to provide `account` and `environment` as input variabl
     ```yaml
     - name: <Required> #The name of the entry
       value: <Optional> # The contents of our password
-      password_length: <Optional> #The number of characters our password is to be
+      password_length: <Optional> #The number of characters our password is to be if not set is a random length between 32 and 64 chars
       overwrite: <Optional> #Do we want to replace the value on each run, default False
       type: password #required
     ```
@@ -51,8 +51,10 @@ The playbook is required to provide `account` and `environment` as input variabl
       public_key: <Optional> # The contents of the public key, if private_key is set and this is empty, will be generated
       private_key: <Optional> # The contents of the private key
       hasPassword: <Optional> # If this is set, a password will be generated for key creation
+      password_length: <Optional> #The number of characters our password is to be if not set is a random length between 32 and 64 chars
       overwrite: <Optional> #Do we want to replace the value on each run, default False
-      type: password #required
+      type: ssh-key #required
+      bits: <Optional> #number of bits in the key
     ```
 
 #### Example metadata
