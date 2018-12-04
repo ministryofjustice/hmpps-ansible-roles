@@ -12,6 +12,7 @@
     - name: Create our certificate if it does not exist
       command: "aws acm request-certificate
                --domain-name *.{{ zone.zone_name | rstrip('.') + '.' + parent_zone_name }}
+               --subject-alternative-names {{ zone.zone_name | rstrip('.') + '.' + parent_zone_name }}
                --validation-method DNS
                --region {{ aws_region|default('eu-west-2') }}"
       environment:
@@ -19,6 +20,7 @@
         AWS_SECRET_ACCESS_KEY: "{{ sts_aws_secret_key }}"
         AWS_SESSION_TOKEN: "{{ sts_security_token }}"
       register: acm_data
+      no_log: true
 
     - name: Wait for aws to catch up
       pause:
@@ -45,6 +47,19 @@
         overwrite: true
       ignore_errors: true
 
+    - name: Ensure we have our name tag set to our liking
+      command: "aws acm add-tags-to-certificate
+                --certificate-arn {{ new_acm_facts.certificates[0].certificate_arn }}
+                --tags
+                  Key=Name,Value=\"{{ zone.zone_name | rstrip('.') + '.' + parent_zone_name }}\"
+                  Key=ManagedBy,Value=\"Ansible\"
+                --region {{ aws_region|default('eu-west-2') }}"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ sts_aws_access_key }}"
+        AWS_SECRET_ACCESS_KEY: "{{ sts_aws_secret_key }}"
+        AWS_SESSION_TOKEN: "{{ sts_security_token }}"
+      no_log: true
+
     - name: Display our certificate arn
       debug:
         msg: "*.{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}: {{ new_acm_facts.certificates[0].certificate_arn }}"
@@ -52,6 +67,27 @@
   when: acm_facts.certificates == []
 
 - block:
+    - name: Set our subject
+      set_fact:
+        test_subject_fact: "CN=*.{{ zone.zone_name | rstrip('.') + '.' + parent_zone_name | rstrip('.')}}"
+
+    - name: Ensure we have our name tag set to our liking
+      command: "aws acm add-tags-to-certificate
+                --certificate-arn {{ item.certificate_arn }}
+                --tags
+                  Key=Name,Value=\"{{ zone.zone_name | rstrip('.') + '.' + parent_zone_name }}\"
+                  Key=ManagedBy,Value=\"Ansible\"
+                --region {{ aws_region|default('eu-west-2') }}"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ sts_aws_access_key }}"
+        AWS_SECRET_ACCESS_KEY: "{{ sts_aws_secret_key }}"
+        AWS_SESSION_TOKEN: "{{ sts_security_token }}"
+      when:
+        - item.tags == {}
+        - item.subject == test_subject_fact
+      with_items: "{{ acm_facts.certificates|default([]) }}"
+      no_log: true
+
     - name: Display our certificate arn
       debug:
         msg: "*.{{ zone.zone_name | rstrip('.') }}.{{ parent_zone_name }}: {{ acm_facts.certificates[0].certificate_arn }}"
