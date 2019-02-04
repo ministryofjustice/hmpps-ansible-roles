@@ -44,7 +44,7 @@
         value: "{{ hosted_zone_facts.ResourceRecordSets.0.ResourceRecords|map(attribute='Value')|list }}"
         overwrite: true
       no_log: true
-      when: is_apex|default(False) == False
+      when: zone.is_apex|default(False) == False
 
     - name: Display our hosted zone output
       debug:
