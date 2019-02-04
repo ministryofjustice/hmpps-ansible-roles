@@ -14,4 +14,5 @@ hosted_zones:
     role_name: #delegated role name
     zone_name: #the subdomaina we want to create minus the parent FQDN
     is_delegated: #True for a subdomain on separate account, false for a subdomain on the apex account
+    is_apex: #True if we are creating a new apex domain, default false
 ```` 

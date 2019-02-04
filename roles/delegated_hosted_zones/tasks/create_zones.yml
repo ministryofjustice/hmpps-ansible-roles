@@ -19,6 +19,7 @@
       register: zone_details
       no_log: true
 
+
     - name: Retrieve our hosted zone facts
       route53_facts:
         aws_access_key: "{{ assumed_role.sts_creds.access_key }}"
@@ -31,7 +32,7 @@
       register: hosted_zone_facts
       no_log: true
 
-    - name: Create our NS entries in the parent
+    - name: Create our NS entries in the parent if this isn't an apex domain
       route53:
         state: present
         aws_access_key: "{{ parent_assumed_role.sts_creds.access_key }}"
@@ -43,6 +44,7 @@
         value: "{{ hosted_zone_facts.ResourceRecordSets.0.ResourceRecords|map(attribute='Value')|list }}"
         overwrite: true
       no_log: true
+      when: is_apex|default(False) == False
 
     - name: Display our hosted zone output
       debug:
