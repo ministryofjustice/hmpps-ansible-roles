@@ -1,7 +1,7 @@
 from ansible import errors
 
 
-def merge_config_dictionaries(dictionary_list):
+def merge_config_dictionaries(*dictionary_list):
     """
     Merges n dictionaries of configuration data
     :param dictionary_list: list
