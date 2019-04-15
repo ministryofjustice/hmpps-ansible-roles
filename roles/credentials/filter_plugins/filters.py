@@ -22,9 +22,24 @@ def merge_config_dictionaries(*dictionary_list):
     return res_dict
 
 
+def merge_dictionaries(*dicts):
+    """
+    Merges n dictionaries of configuration data
+    :param list<dicts>:
+    :return dict:
+    Merges n dictionaries passed in as arguments, dictionaries will be overwritten in FIFO order
+    """
+    try:
+        return {k: v for d in dicts for k, v in d.items()}
+    except AttributeError as exep:
+        print("Only dictionaries are supported as an argument list")
+        print(exep)
+
+
 class FilterModule(object):
     def filters(self):
         filter_list = {
-            'merge_config_dictionaries': merge_config_dictionaries
+            'merge_config_dictionaries': merge_config_dictionaries,
+            'merge_dictionaries': merge_dictionaries
         }
         return filter_list
